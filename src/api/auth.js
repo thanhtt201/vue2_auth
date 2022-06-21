@@ -1,4 +1,4 @@
-import { axiosClient } from "./axiosClient";
+import axiosClient from "./axiosClient";
 
 const authApi = {
   signUp(payload) {
@@ -8,6 +8,10 @@ const authApi = {
   signIn(payload) {
     const url = "/auth/login";
     return axiosClient.post(url, payload);
+  },
+  userList() {
+    const url = "/users";
+    return axiosClient.get(url);
   },
 };
 

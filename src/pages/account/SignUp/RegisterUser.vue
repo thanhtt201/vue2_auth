@@ -54,9 +54,14 @@
       </form>
     </div>
     <ErrorModal
-      v-if="modalActive"
-      @hide-modal="hideModal"
-      :modal-active="modalActive"
+      v-if="errorModal.modalActive"
+      @hide-error-modal="hideErrorModal"
+      :error-modal="errorModal"
+    />
+    <SuccessModal
+      v-if="successModal.active"
+      @hide-success-modal="hideSuccessModal"
+      :success-modal="successModal"
     />
   </div>
 </template>
@@ -64,6 +69,7 @@
 <script>
 import userApi from "../../../api/auth.js";
 import ErrorModal from "@/components/modal/ErrorModal.vue";
+import SuccessModal from "@/components/modal/SuccessModal.vue";
 import {
   required,
   email,
@@ -81,11 +87,20 @@ export default {
         password: "",
         phone: "",
       },
-      modalActive: false,
+      errorModal: {
+        modalActive: false,
+        message: "Lỗi server. Vui lòng kiểm tra lại!",
+      },
+      successModal: {
+        active: false,
+        title: "Thành công",
+        message: "Thành công",
+      },
     };
   },
   components: {
     ErrorModal,
+    SuccessModal,
   },
   validations() {
     return {
@@ -105,7 +120,6 @@ export default {
   },
   computed: {
     errorFirstName() {
-      console.log("h", this.$v);
       let error;
       if (!this.$v.formRegister.firstName.$dirty) return null;
       if (!this.$v.formRegister.firstName.required) {
@@ -152,19 +166,33 @@ export default {
   methods: {
     async handleRegister(event) {
       event.preventDefault();
+      const userInfo = {
+        lastname: this.formRegister.lastName,
+        firstname: this.formRegister.firstName,
+        email: this.formRegister.email,
+        password: this.formRegister.password,
+        phone: this.formRegister.phone,
+      };
       try {
-        const res = await userApi.signUp(this.formRegister);
-        console.log("res", res);
+        const res = await userApi.signUp(userInfo);
+        if (res.data) {
+          this.successModal.active = true;
+        }
       } catch (error) {
-        console.log("error", error.response);
-        this.modalActive = true;
+        if (error.response.data.message.length > 1) {
+          this.errorModal.message = error.response.data.message[0];
+        } else {
+          this.errorModal.message = error.response.data.message;
+        }
+        this.errorModal.modalActive = true;
       }
     },
-    loggg() {
-      console.log({ $v: this.$v });
+    hideErrorModal($v) {
+      this.errorModal.modalActive = $v;
     },
-    hideModal($v) {
-      this.modalActive = $v;
+    hideSuccessModal($v) {
+      this.successModal.active = $v;
+      this.$router.push("/signin");
     },
   },
   // mounted() {

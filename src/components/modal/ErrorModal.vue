@@ -1,14 +1,14 @@
 <template>
   <div @click.self="hideModal" class="overlay">
     <div class="frame">
-      <div :class="['modal', modalActive ? '' : 'hide']">
+      <div :class="['modal', errorModal.modalActive ? '' : 'hide']">
         <img
           src="https://100dayscss.com/codepen/alert.png"
           width="44"
           height="38"
         />
         <span class="title">Oh snap!</span>
-        <p>An error has occured while creating an error report.</p>
+        <p>{{ errorModal.message }}</p>
         <div class="button" @click="hideModal">Oke</div>
       </div>
     </div>
@@ -17,10 +17,14 @@
 
 <script>
 export default {
-  props: ["modalActive"],
+  props: {
+    errorModal: {
+      type: Object,
+    },
+  },
   methods: {
     hideModal() {
-      this.$emit("hide-modal", false);
+      this.$emit("hide-error-modal", false);
     },
   },
 };

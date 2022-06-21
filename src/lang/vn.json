@@ -1,0 +1,19 @@
+{
+  "common": {
+    "select_lang": "Ngôn ngữ"
+  },
+  "login": {
+    "title": "Đăng nhập vào dibochit",
+    "buttons": {
+      "login": "Đăng nhập"
+    },
+    "input_text": {
+      "email": "Email",
+      "password": "Mật khẩu"
+    },
+    "messages": {
+      "none_account": "Chưa đăng kí?",
+      "register": "Tạo tài khoản mới"
+    }
+  }
+}

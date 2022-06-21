@@ -1,50 +1,91 @@
 <template>
   <div class="login-page">
     <div class="form">
-      <form class="login-form">
-        <input type="text" placeholder="username" />
-        <input type="password" placeholder="password" />
-        <button>login</button>
+      <form class="login-form" @submit.prevent="handleLoginUser">
+        <input type="text" placeholder="email" v-model="formLogin.email" />
+        <input
+          type="password"
+          placeholder="password"
+          v-model="formLogin.password"
+        />
+        <button>{{ $t("login.buttons.login") }}</button>
         <p class="message">
-          Not registered?
-          <router-link to="/signup">Create an account</router-link>
+          {{ $t("login.messages.none_account") }}
+          <router-link to="/signup">{{
+            $t("login.messages.register")
+          }}</router-link>
         </p>
       </form>
     </div>
+    <ErrorModal
+      v-if="errorModal.modalActive"
+      @hide-error-modal="hideErrorModal"
+      :error-modal="errorModal"
+    />
+    <SuccessModal
+      v-if="successModal.active"
+      @hide-success-modal="hideSuccessModal"
+      :success-modal="successModal"
+    />
   </div>
 </template>
 
 <script>
+import authApi from "@/api/auth";
+import ErrorModal from "@/components/modal/ErrorModal.vue";
+import SuccessModal from "@/components/modal/SuccessModal.vue";
+
 export default {
   data() {
     return {
-      registerActive: false,
-      emailLogin: "",
-      passwordLogin: "",
-      emailReg: "",
-      passwordReg: "",
-      confirmReg: "",
-      emptyFields: false,
+      formLogin: {
+        email: "",
+        password: "",
+      },
+      errorModal: {
+        modalActive: false,
+        message: "Lỗi server. Vui lòng kiểm tra lại!",
+      },
+      successModal: {
+        active: false,
+        title: "Thành công",
+        message: "Thành công",
+      },
     };
   },
+  components: {
+    ErrorModal,
+    SuccessModal,
+  },
   methods: {
-    doLogin() {
-      if (this.emailLogin === "" || this.passwordLogin === "") {
-        this.emptyFields = true;
-      } else {
-        alert("You are now logged in");
+    async handleLoginUser() {
+      try {
+        const res = await authApi.signIn(this.formLogin);
+        if (res.data.accessToken) {
+          localStorage.setItem(
+            "accessToken",
+            JSON.stringify(res.data.accessToken)
+          );
+        }
+        if (res.data) {
+          this.successModal.active = true;
+        }
+      } catch (error) {
+        // console.log("error", error.response.data.message);
+        // if (typeof error.response.data.message === Array) {
+        //   this.errorModal.message = error.response.data.message[0];
+        // } else {
+        this.errorModal.message = error.response.data.message;
+        // }
+        this.errorModal.modalActive = true;
       }
     },
-    doRegister() {
-      if (
-        this.emailReg === "" ||
-        this.passwordReg === "" ||
-        this.confirmReg === ""
-      ) {
-        this.emptyFields = true;
-      } else {
-        alert("You are now registered");
-      }
+    hideErrorModal($v) {
+      this.errorModal.modalActive = $v;
+    },
+    hideSuccessModal($v) {
+      this.successModal.active = $v;
+      this.$router.push("/");
     },
   },
 };
