@@ -13,6 +13,10 @@ const authApi = {
     const url = "/users";
     return axiosClient.get(url);
   },
+  refreshToken() {
+    const url = "/auth/refreshToken";
+    return axiosClient.post(url);
+  },
 };
 
 export default authApi;
